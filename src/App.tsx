@@ -6,6 +6,7 @@ import Header from './components/Header';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
 import Dashboard from './components/admin/Dashboard';
+import AdminPanel from './components/admin/AdminPanel';
 import Settings from './components/settings/Settings';
 import PaymentDashboard from './components/payment/PaymentDashboard';
 import { AuthProvider } from './context/AuthContext';
@@ -35,6 +36,14 @@ function App() {
               element={
                 <AdminRoute>
                   <Dashboard />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/panel" 
+              element={
+                <AdminRoute>
+                  <AdminPanel />
                 </AdminRoute>
               } 
             />

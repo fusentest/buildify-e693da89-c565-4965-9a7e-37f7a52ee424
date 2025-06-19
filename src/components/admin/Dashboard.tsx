@@ -7,12 +7,14 @@ import {
 import { DashboardStats, User } from '../../types/auth';
 import { Message } from '../../types/chat';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import UserManagement from './UserManagement';
 import PermissionGuard from '../auth/PermissionGuard';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
   const { hasPermission } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -132,6 +134,10 @@ const Dashboard: React.FC = () => {
     return sampleTopics;
   };
   
+  const handleAdvancedAdminClick = () => {
+    navigate('/admin/panel');
+  };
+  
   if (!hasPermission('view_dashboard')) {
     return (
       <div className="permission-denied">
@@ -154,31 +160,41 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Admin Dashboard</h1>
-        <div className="dashboard-tabs">
-          <button 
-            className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            Overview
-          </button>
-          <PermissionGuard permission="manage_users">
-            <button 
-              className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
-              onClick={() => setActiveTab('users')}
-            >
-              Users
-            </button>
-          </PermissionGuard>
-          <PermissionGuard permission="view_analytics">
-            <button 
-              className={`tab-button ${activeTab === 'messages' ? 'active' : ''}`}
-              onClick={() => setActiveTab('messages')}
-            >
-              Messages
-            </button>
-          </PermissionGuard>
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p>Overview of system metrics and activity</p>
         </div>
+        <button 
+          className="advanced-admin-button"
+          onClick={handleAdvancedAdminClick}
+        >
+          Advanced Admin Panel
+        </button>
+      </div>
+      
+      <div className="dashboard-tabs">
+        <button 
+          className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          Overview
+        </button>
+        <PermissionGuard permission="manage_users">
+          <button 
+            className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('users')}
+          >
+            Users
+          </button>
+        </PermissionGuard>
+        <PermissionGuard permission="view_analytics">
+          <button 
+            className={`tab-button ${activeTab === 'messages' ? 'active' : ''}`}
+            onClick={() => setActiveTab('messages')}
+          >
+            Messages
+          </button>
+        </PermissionGuard>
       </div>
       
       {activeTab === 'overview' && (

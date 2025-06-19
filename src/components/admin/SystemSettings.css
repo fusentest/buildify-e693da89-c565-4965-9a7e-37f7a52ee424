@@ -1,0 +1,241 @@
+
+.system-settings {
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+.settings-header {
+  margin-bottom: 1.5rem;
+}
+
+.settings-header h2 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.settings-header p {
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.success-message {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.8rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 0.8rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.settings-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--light-gray);
+  padding-bottom: 0.5rem;
+}
+
+.settings-tab {
+  padding: 0.6rem 1rem;
+  background: none;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.settings-tab:hover {
+  color: var(--primary-color);
+}
+
+.settings-tab.active {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+  font-weight: 500;
+}
+
+.settings-section {
+  margin-bottom: 2rem;
+}
+
+.settings-section h3 {
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+.setting-item {
+  margin-bottom: 1.5rem;
+}
+
+.setting-item label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.setting-item.checkbox {
+  display: flex;
+  align-items: flex-start;
+}
+
+.setting-item.checkbox input {
+  margin-top: 0.25rem;
+  margin-right: 0.75rem;
+  width: 18px;
+  height: 18px;
+}
+
+.setting-item.checkbox label {
+  margin-bottom: 0.25rem;
+}
+
+.setting-description {
+  font-size: 0.85rem;
+  color: #757575;
+  margin-top: 0.25rem;
+  margin-left: 0;
+}
+
+.setting-item.checkbox .setting-description {
+  margin-left: 2.25rem;
+  margin-top: -0.25rem;
+}
+
+.setting-item input[type="text"],
+.setting-item input[type="number"],
+.setting-item select {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.6rem;
+  border: 1px solid var(--light-gray);
+  border-radius: 4px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.setting-item input[type="color"] {
+  width: 100px;
+  height: 40px;
+  padding: 0.25rem;
+  border: 1px solid var(--light-gray);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.setting-item input:focus,
+.setting-item select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.color-preview {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: var(--background-color);
+  border-radius: 8px;
+}
+
+.color-preview h4 {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.preview-primary,
+.preview-accent {
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+  text-align: center;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--light-gray);
+}
+
+.save-button,
+.reset-button {
+  padding: 0.7rem 1.5rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.save-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: var(--secondary-color);
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.reset-button {
+  background-color: transparent;
+  color: var(--text-color);
+  border: 1px solid var(--light-gray);
+}
+
+.reset-button:hover {
+  background-color: var(--light-gray);
+}
+
+@media (max-width: 768px) {
+  .system-settings {
+    padding: 1rem;
+  }
+  
+  .settings-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .settings-tab {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+  }
+  
+  .setting-item input[type="text"],
+  .setting-item input[type="number"],
+  .setting-item select {
+    max-width: 100%;
+  }
+  
+  .settings-actions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+  
+  .save-button,
+  .reset-button {
+    width: 100%;
+  }
+}

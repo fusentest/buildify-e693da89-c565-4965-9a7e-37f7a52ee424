@@ -6,6 +6,10 @@
   box-shadow: var(--shadow);
 }
 
+.header.admin-panel-mode {
+  display: none;
+}
+
 .header-content {
   display: flex;
   justify-content: space-between;

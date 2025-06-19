@@ -15,8 +15,11 @@ const Header: React.FC = () => {
     navigate('/login');
   };
 
+  // Check if we're on the admin panel page
+  const isAdminPanel = location.pathname === '/admin/panel';
+
   return (
-    <header className="header">
+    <header className={`header ${isAdminPanel ? 'admin-panel-mode' : ''}`}>
       <div className="header-content">
         <Link to="/" className="logo">
           <h1>ChatBot</h1>
@@ -28,10 +31,10 @@ const Header: React.FC = () => {
             
             <PermissionGuard permission="view_dashboard">
               <Link 
-                to={location.pathname === '/admin' ? '/' : '/admin'} 
+                to={location.pathname.includes('/admin') ? '/' : '/admin'} 
                 className="admin-link"
               >
-                {location.pathname === '/admin' ? 'Chat' : 'Dashboard'}
+                {location.pathname.includes('/admin') ? 'Chat' : 'Dashboard'}
               </Link>
             </PermissionGuard>
             
