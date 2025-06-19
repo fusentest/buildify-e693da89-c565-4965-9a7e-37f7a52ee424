@@ -3,19 +3,28 @@ import React, { useState, useRef, useEffect } from 'react';
 import './ChatInterface.css';
 import { getChatbotResponse } from '../utils/chatbotLogic';
 import { Message } from '../types/chat';
+import { useAuth } from '../context/AuthContext';
 
 const ChatInterface: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Hello! I\'m your friendly chatbot. How can I help you today?',
-      sender: 'bot',
-      timestamp: new Date()
-    }
-  ]);
+  const { currentUser } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Initialize chat with welcome message when component mounts
+    if (currentUser && messages.length === 0) {
+      setMessages([
+        {
+          id: '1',
+          text: `Hello ${currentUser.name}! I'm your friendly chatbot. How can I help you today?`,
+          sender: 'bot',
+          timestamp: new Date()
+        }
+      ]);
+    }
+  }, [currentUser, messages.length]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
