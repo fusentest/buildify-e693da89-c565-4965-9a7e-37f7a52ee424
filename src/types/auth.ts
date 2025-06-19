@@ -7,6 +7,14 @@ export interface User {
   role?: 'user' | 'admin';
 }
 
+export interface UserPreferences {
+  enableNotifications: boolean;
+  darkMode: boolean;
+  messageSound: boolean;
+  autoScroll: boolean;
+  fontSize: 'small' | 'medium' | 'large';
+}
+
 export interface UserStats {
   totalUsers: number;
   activeUsers: number;

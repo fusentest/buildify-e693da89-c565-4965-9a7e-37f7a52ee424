@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { User } from '../types/auth';
+import { User, UserPreferences } from '../types/auth';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -8,6 +8,10 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (data: { name?: string }) => Promise<void>;
+  updateEmail: (email: string) => Promise<void>;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  updatePreferences: (preferences: UserPreferences) => Promise<void>;
   isAdmin: boolean;
 }
 
@@ -117,6 +121,127 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsAdmin(false);
     localStorage.removeItem('currentUser');
   };
+  
+  // Update profile information
+  const updateProfile = async (data: { name?: string }) => {
+    if (!currentUser) {
+      return Promise.reject(new Error('No user is logged in'));
+    }
+    
+    try {
+      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      const userIndex = storedUsers.findIndex((u: any) => u.id === currentUser.id);
+      
+      if (userIndex === -1) {
+        throw new Error('User not found');
+      }
+      
+      // Update user data
+      const updatedUser = {
+        ...storedUsers[userIndex],
+        ...data
+      };
+      
+      storedUsers[userIndex] = updatedUser;
+      localStorage.setItem('users', JSON.stringify(storedUsers));
+      
+      // Update current user state
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      setCurrentUser(userWithoutPassword);
+      localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
+      
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  };
+  
+  // Update email
+  const updateEmail = async (email: string) => {
+    if (!currentUser) {
+      return Promise.reject(new Error('No user is logged in'));
+    }
+    
+    try {
+      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      
+      // Check if email is already in use
+      if (storedUsers.some((u: any) => u.email === email && u.id !== currentUser.id)) {
+        throw new Error('Email is already in use');
+      }
+      
+      const userIndex = storedUsers.findIndex((u: any) => u.id === currentUser.id);
+      
+      if (userIndex === -1) {
+        throw new Error('User not found');
+      }
+      
+      // Update email
+      storedUsers[userIndex].email = email;
+      localStorage.setItem('users', JSON.stringify(storedUsers));
+      
+      // Update current user state
+      const { password: _, ...userWithoutPassword } = storedUsers[userIndex];
+      setCurrentUser(userWithoutPassword);
+      localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
+      
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  };
+  
+  // Update password
+  const updatePassword = async (currentPassword: string, newPassword: string) => {
+    if (!currentUser) {
+      return Promise.reject(new Error('No user is logged in'));
+    }
+    
+    try {
+      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      const userIndex = storedUsers.findIndex((u: any) => u.id === currentUser.id);
+      
+      if (userIndex === -1) {
+        throw new Error('User not found');
+      }
+      
+      // Verify current password
+      if (storedUsers[userIndex].password !== currentPassword) {
+        throw new Error('Current password is incorrect');
+      }
+      
+      // Update password
+      storedUsers[userIndex].password = newPassword;
+      localStorage.setItem('users', JSON.stringify(storedUsers));
+      
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  };
+  
+  // Update user preferences
+  const updatePreferences = async (preferences: UserPreferences) => {
+    if (!currentUser) {
+      return Promise.reject(new Error('No user is logged in'));
+    }
+    
+    try {
+      // Store preferences in localStorage
+      localStorage.setItem(`preferences_${currentUser.id}`, JSON.stringify(preferences));
+      
+      // Apply preferences if needed (e.g., dark mode)
+      if (preferences.darkMode) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  };
 
   const value = {
     currentUser,
@@ -124,6 +249,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     signup,
     logout,
+    updateProfile,
+    updateEmail,
+    updatePassword,
+    updatePreferences,
     isAdmin
   };
 

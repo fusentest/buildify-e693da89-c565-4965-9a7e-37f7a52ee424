@@ -34,6 +34,10 @@ const Header: React.FC = () => {
               </Link>
             )}
             
+            <Link to="/settings" className="settings-link">
+              Settings
+            </Link>
+            
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>

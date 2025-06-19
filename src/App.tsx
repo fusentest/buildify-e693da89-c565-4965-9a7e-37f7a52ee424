@@ -6,6 +6,7 @@ import Header from './components/Header';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
 import Dashboard from './components/admin/Dashboard';
+import Settings from './components/settings/Settings';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/admin/AdminRoute';
@@ -34,6 +35,14 @@ function App() {
                 <AdminRoute>
                   <Dashboard />
                 </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
               } 
             />
             <Route path="*" element={<Navigate to="/" />} />

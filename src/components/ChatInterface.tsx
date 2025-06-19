@@ -11,6 +11,11 @@ const ChatInterface: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [userPreferences, setUserPreferences] = useState({
+    autoScroll: true,
+    messageSound: true,
+    fontSize: 'medium'
+  });
 
   useEffect(() => {
     // Initialize chat with welcome message when component mounts
@@ -24,18 +29,66 @@ const ChatInterface: React.FC = () => {
         }
       ]);
     }
+    
+    // Load user preferences
+    if (currentUser) {
+      const storedPreferences = localStorage.getItem(`preferences_${currentUser.id}`);
+      if (storedPreferences) {
+        const preferences = JSON.parse(storedPreferences);
+        setUserPreferences({
+          autoScroll: preferences.autoScroll,
+          messageSound: preferences.messageSound,
+          fontSize: preferences.fontSize
+        });
+        
+        // Apply font size preference
+        document.body.setAttribute('data-font-size', preferences.fontSize);
+        
+        // Apply dark mode if enabled
+        if (preferences.darkMode) {
+          document.body.classList.add('dark-mode');
+        } else {
+          document.body.classList.remove('dark-mode');
+        }
+      }
+    }
   }, [currentUser, messages.length]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (userPreferences.autoScroll) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, userPreferences.autoScroll]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
+  };
+
+  const playMessageSound = () => {
+    if (userPreferences.messageSound) {
+      // Simple beep sound using Web Audio API
+      try {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 800;
+        gainNode.gain.value = 0.1;
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.start();
+        setTimeout(() => oscillator.stop(), 100);
+      } catch (error) {
+        console.error('Error playing message sound:', error);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,11 +121,12 @@ const ChatInterface: React.FC = () => {
       
       setMessages(prev => [...prev, botMessage]);
       setIsTyping(false);
+      playMessageSound();
     }, 1000);
   };
 
   return (
-    <div className="chat-container">
+    <div className={`chat-container ${document.body.classList.contains('dark-mode') ? 'dark-mode' : ''}`}>
       <div className="chat-messages">
         {messages.map((message) => (
           <div 
