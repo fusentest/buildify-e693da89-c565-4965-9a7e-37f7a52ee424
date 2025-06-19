@@ -12,7 +12,11 @@ import {
 import { SubscriptionPlan, Subscription } from '../../types/payment';
 import './Payment.css';
 
-const SubscriptionPlans: React.FC = () => {
+interface SubscriptionPlansProps {
+  onSubscriptionChange?: () => void;
+}
+
+const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onSubscriptionChange }) => {
   const { currentUser } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +24,7 @@ const SubscriptionPlans: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [isConfirmingCancel, setIsConfirmingCancel] = useState(false);
+  const [showBenefits, setShowBenefits] = useState(false);
   
   useEffect(() => {
     if (currentUser) {
@@ -81,6 +86,11 @@ const SubscriptionPlans: React.FC = () => {
       
       setSubscription(newSubscription);
       setSuccessMessage('Subscription created successfully');
+      
+      // Notify parent component about subscription change
+      if (onSubscriptionChange) {
+        onSubscriptionChange();
+      }
       
       // Clear success message after 3 seconds
       setTimeout(() => {
@@ -217,6 +227,123 @@ const SubscriptionPlans: React.FC = () => {
         </div>
       )}
       
+      <div className="subscription-benefits">
+        <h3>Why Subscribe?</h3>
+        <p>Enhance your chatbot experience with premium features and capabilities.</p>
+        
+        <button 
+          className="benefits-toggle"
+          onClick={() => setShowBenefits(!showBenefits)}
+        >
+          {showBenefits ? 'Hide Benefits' : 'Show Benefits'}
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            style={{ transform: showBenefits ? 'rotate(180deg)' : 'none' }}
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        
+        {showBenefits && (
+          <div className="benefits-list">
+            <div className="benefit-item">
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <div>
+                <h4>Unlimited Messages</h4>
+                <p>No daily limits on your conversations</p>
+              </div>
+            </div>
+            
+            <div className="benefit-item">
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <div>
+                <h4>Faster Response Times</h4>
+                <p>Priority processing for all your queries</p>
+              </div>
+            </div>
+            
+            <div className="benefit-item">
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              <div>
+                <h4>Advanced Features</h4>
+                <p>Access to premium capabilities and integrations</p>
+              </div>
+            </div>
+            
+            <div className="benefit-item">
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <div>
+                <h4>Priority Support</h4>
+                <p>Get help faster when you need assistance</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
       <div className="subscription-plans-grid">
         {subscriptionPlans.map(plan => (
           <div 
@@ -254,6 +381,43 @@ const SubscriptionPlans: React.FC = () => {
             )}
           </div>
         ))}
+      </div>
+      
+      <div className="subscription-faq">
+        <h3>Frequently Asked Questions</h3>
+        
+        <div className="faq-item">
+          <h4>How will I be billed?</h4>
+          <p>
+            You'll be billed automatically on a recurring basis (monthly or yearly, depending on your plan).
+            You can cancel anytime from your account settings.
+          </p>
+        </div>
+        
+        <div className="faq-item">
+          <h4>Can I change plans?</h4>
+          <p>
+            Yes, you can upgrade or downgrade your plan at any time. When upgrading, you'll be charged the prorated
+            difference for the remainder of your billing cycle. When downgrading, the change will take effect at the
+            end of your current billing cycle.
+          </p>
+        </div>
+        
+        <div className="faq-item">
+          <h4>What happens when I cancel?</h4>
+          <p>
+            When you cancel your subscription, you'll continue to have access to your premium features until the
+            end of your current billing period. After that, your account will revert to the free tier.
+          </p>
+        </div>
+        
+        <div className="faq-item">
+          <h4>Is there a free trial?</h4>
+          <p>
+            We offer a 7-day free trial for new subscribers. You can cancel anytime during the trial period
+            and you won't be charged.
+          </p>
+        </div>
       </div>
     </div>
   );

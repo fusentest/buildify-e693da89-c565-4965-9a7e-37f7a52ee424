@@ -20,7 +20,8 @@ export const subscriptionPlans: SubscriptionPlan[] = [
     features: [
       'Basic chatbot features',
       'Up to 100 messages per day',
-      'Email support'
+      'Email support',
+      'Message history for 7 days'
     ]
   },
   {
@@ -33,7 +34,9 @@ export const subscriptionPlans: SubscriptionPlan[] = [
       'Advanced chatbot features',
       'Unlimited messages',
       'Priority support',
-      'Analytics dashboard'
+      'Analytics dashboard',
+      'Message history for 30 days',
+      'Custom chat themes'
     ],
     isPopular: true
   },
@@ -48,7 +51,9 @@ export const subscriptionPlans: SubscriptionPlan[] = [
       'Custom integrations',
       'Dedicated account manager',
       'SLA guarantees',
-      'Advanced security'
+      'Advanced security',
+      'Unlimited message history',
+      'Multi-user access'
     ]
   }
 ];
@@ -353,6 +358,26 @@ export const completeCheckoutSession = (userId: string, paymentMethodId: string)
     });
     localStorage.setItem(`orders_${userId}`, JSON.stringify(orders));
     
+    // Create an invoice for this purchase
+    const invoice: Invoice = {
+      id: `inv_${Date.now()}`,
+      userId,
+      subscriptionId: 'one_time_purchase',
+      amount: session.total,
+      status: 'paid',
+      date: new Date().toISOString(),
+      dueDate: new Date().toISOString(),
+      items: session.items.map(item => ({
+        id: `item_${Date.now()}_${item.id}`,
+        description: item.name,
+        amount: item.price,
+        quantity: item.quantity
+      }))
+    };
+    
+    const invoices = getUserInvoices(userId);
+    localStorage.setItem(`invoices_${userId}`, JSON.stringify([...invoices, invoice]));
+    
     return session;
   } catch (error) {
     console.error('Error completing checkout session:', error);
@@ -437,4 +462,90 @@ export const getCardType = (cardNumber: string): 'visa' | 'mastercard' | 'amex' 
   if (/^(6011|65|64[4-9]|622(12[6-9]|1[3-9]|[2-8]|9[01]|92[0-5]))/.test(number)) return 'discover';
   
   return 'other';
+};
+
+// Apply subscription benefits to user
+export const applySubscriptionBenefits = (userId: string): void => {
+  try {
+    const subscription = getUserSubscription(userId);
+    if (!subscription || subscription.status !== 'active') {
+      return;
+    }
+    
+    const plan = subscriptionPlans.find(p => p.id === subscription.planId);
+    if (!plan) {
+      return;
+    }
+    
+    // Store user benefits based on subscription plan
+    const benefits = {
+      maxMessagesPerDay: plan.id === 'basic' ? 100 : 
+                         plan.id === 'pro' ? 500 : 
+                         Infinity,
+      messageHistoryDays: plan.id === 'basic' ? 7 : 
+                          plan.id === 'pro' ? 30 : 
+                          365,
+      prioritySupport: plan.id !== 'basic',
+      customThemes: plan.id !== 'basic',
+      analytics: plan.id !== 'basic',
+      multiUser: plan.id === 'enterprise'
+    };
+    
+    localStorage.setItem(`subscription_benefits_${userId}`, JSON.stringify(benefits));
+  } catch (error) {
+    console.error('Error applying subscription benefits:', error);
+  }
+};
+
+// Check if user has a specific subscription benefit
+export const hasSubscriptionBenefit = (userId: string, benefit: string): boolean => {
+  try {
+    const benefitsData = localStorage.getItem(`subscription_benefits_${userId}`);
+    if (!benefitsData) {
+      return false;
+    }
+    
+    const benefits = JSON.parse(benefitsData);
+    return !!benefits[benefit];
+  } catch (error) {
+    console.error('Error checking subscription benefit:', error);
+    return false;
+  }
+};
+
+// Get user's remaining message quota
+export const getRemainingMessageQuota = (userId: string): number => {
+  try {
+    const benefitsData = localStorage.getItem(`subscription_benefits_${userId}`);
+    if (!benefitsData) {
+      return 10; // Default free tier limit
+    }
+    
+    const benefits = JSON.parse(benefitsData);
+    const maxMessages = benefits.maxMessagesPerDay || 10;
+    
+    // Get messages sent today
+    const today = new Date().toDateString();
+    const messageCountData = localStorage.getItem(`message_count_${userId}_${today}`);
+    const messageCount = messageCountData ? parseInt(messageCountData, 10) : 0;
+    
+    return Math.max(0, maxMessages - messageCount);
+  } catch (error) {
+    console.error('Error getting remaining message quota:', error);
+    return 0;
+  }
+};
+
+// Increment user's message count for today
+export const incrementMessageCount = (userId: string): void => {
+  try {
+    const today = new Date().toDateString();
+    const messageCountKey = `message_count_${userId}_${today}`;
+    const messageCountData = localStorage.getItem(messageCountKey);
+    const messageCount = messageCountData ? parseInt(messageCountData, 10) : 0;
+    
+    localStorage.setItem(messageCountKey, (messageCount + 1).toString());
+  } catch (error) {
+    console.error('Error incrementing message count:', error);
+  }
 };
