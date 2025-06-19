@@ -4,6 +4,8 @@ import './ChatInterface.css';
 import { getChatbotResponse } from '../utils/chatbotLogic';
 import { Message } from '../types/chat';
 import { useAuth } from '../context/AuthContext';
+import SearchBar from './search/SearchBar';
+import SearchModal from './search/SearchModal';
 
 const ChatInterface: React.FC = () => {
   const { currentUser } = useAuth();
@@ -16,6 +18,9 @@ const ChatInterface: React.FC = () => {
     messageSound: true,
     fontSize: 'medium'
   });
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
 
   useEffect(() => {
     // Initialize chat with welcome message when component mounts
@@ -52,6 +57,22 @@ const ChatInterface: React.FC = () => {
         }
       }
     }
+    
+    // Load stored messages
+    const storedMessages = localStorage.getItem('chatMessages');
+    if (storedMessages) {
+      try {
+        const parsedMessages = JSON.parse(storedMessages);
+        // Convert string timestamps to Date objects
+        const messagesWithDateObjects = parsedMessages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+        setMessages(messagesWithDateObjects);
+      } catch (error) {
+        console.error('Error loading stored messages:', error);
+      }
+    }
   }, [currentUser, messages.length]);
 
   const scrollToBottom = () => {
@@ -63,6 +84,17 @@ const ChatInterface: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, userPreferences.autoScroll]);
+
+  // Clear highlighted message after a delay
+  useEffect(() => {
+    if (highlightedMessageId) {
+      const timer = setTimeout(() => {
+        setHighlightedMessageId(null);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedMessageId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
@@ -125,13 +157,43 @@ const ChatInterface: React.FC = () => {
     }, 1000);
   };
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    
+    if (query.trim()) {
+      setIsSearchModalOpen(true);
+    }
+  };
+
+  const handleMessageClick = (messageId: string) => {
+    setHighlightedMessageId(messageId);
+    
+    // Find the message element and scroll to it
+    const messageElement = document.getElementById(`message-${messageId}`);
+    if (messageElement) {
+      messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   return (
     <div className={`chat-container ${document.body.classList.contains('dark-mode') ? 'dark-mode' : ''}`}>
+      <div className="chat-header">
+        <h2>Chat</h2>
+        <SearchBar 
+          onSearch={handleSearch} 
+          placeholder="Search messages..." 
+          className="chat-search-bar"
+        />
+      </div>
+      
       <div className="chat-messages">
         {messages.map((message) => (
           <div 
+            id={`message-${message.id}`}
             key={message.id} 
-            className={`message ${message.sender === 'user' ? 'user-message' : 'bot-message'}`}
+            className={`message ${message.sender === 'user' ? 'user-message' : 'bot-message'} ${
+              highlightedMessageId === message.id ? 'highlighted' : ''
+            }`}
           >
             <div className="message-content">
               <p>{message.text}</p>
@@ -165,6 +227,13 @@ const ChatInterface: React.FC = () => {
           Send
         </button>
       </form>
+      
+      <SearchModal 
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        messages={messages}
+        onMessageClick={handleMessageClick}
+      />
     </div>
   );
 };

@@ -1,0 +1,124 @@
+
+.search-results {
+  margin-top: 1rem;
+}
+
+.search-results-header {
+  margin-bottom: 1rem;
+}
+
+.search-results-header h3 {
+  font-size: 1.1rem;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.search-result-item {
+  background-color: var(--white);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.search-result-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.search-result-item.user-message {
+  border-left: 4px solid var(--primary-color);
+}
+
+.search-result-item.bot-message {
+  border-left: 4px solid var(--accent-color);
+}
+
+.search-result-sender {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.user-message .search-result-sender {
+  color: var(--primary-color);
+}
+
+.bot-message .search-result-sender {
+  color: var(--accent-color);
+}
+
+.search-result-content {
+  font-size: 0.95rem;
+  color: var(--text-color);
+  line-height: 1.5;
+}
+
+.search-result-content mark {
+  background-color: rgba(255, 213, 79, 0.4);
+  padding: 0.1rem 0.2rem;
+  border-radius: 2px;
+}
+
+.search-result-time {
+  font-size: 0.8rem;
+  color: #757575;
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
+.search-results-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  color: #757575;
+  font-size: 0.95rem;
+}
+
+/* Dark mode styles */
+body.dark-mode .search-result-item {
+  background-color: #2a2a2a;
+}
+
+body.dark-mode .search-result-content {
+  color: #e0e0e0;
+}
+
+body.dark-mode .search-result-time {
+  color: #aaa;
+}
+
+body.dark-mode .search-results-empty {
+  background-color: #2a2a2a;
+  color: #aaa;
+}
+
+body.dark-mode .search-result-content mark {
+  background-color: rgba(255, 213, 79, 0.3);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .search-results-list {
+    max-height: 300px;
+  }
+  
+  .search-result-item {
+    padding: 0.75rem;
+  }
+}
