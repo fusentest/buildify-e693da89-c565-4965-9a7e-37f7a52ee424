@@ -4,8 +4,20 @@ export interface User {
   email: string;
   name: string;
   createdAt: string;
-  role?: 'user' | 'admin';
+  role: Role;
+  permissions?: Permission[];
 }
+
+export type Role = 'admin' | 'moderator' | 'user';
+
+export type Permission = 
+  | 'view_dashboard'
+  | 'manage_users'
+  | 'delete_messages'
+  | 'edit_settings'
+  | 'view_analytics'
+  | 'export_data'
+  | 'manage_roles';
 
 export interface UserPreferences {
   enableNotifications: boolean;
@@ -34,4 +46,11 @@ export interface ChatStats {
 export interface DashboardStats {
   userStats: UserStats;
   chatStats: ChatStats;
+}
+
+export interface RoleDefinition {
+  name: Role;
+  displayName: string;
+  description: string;
+  permissions: Permission[];
 }

@@ -6,6 +6,7 @@ import { Message } from '../types/chat';
 import { useAuth } from '../context/AuthContext';
 import SearchBar from './search/SearchBar';
 import SearchModal from './search/SearchModal';
+import PermissionGuard from './auth/PermissionGuard';
 
 const ChatInterface: React.FC = () => {
   const { currentUser } = useAuth();
@@ -175,6 +176,14 @@ const ChatInterface: React.FC = () => {
     }
   };
 
+  const handleDeleteMessage = (messageId: string) => {
+    setMessages(prev => prev.filter(message => message.id !== messageId));
+    
+    // Update stored messages
+    const updatedMessages = messages.filter(message => message.id !== messageId);
+    localStorage.setItem('chatMessages', JSON.stringify(updatedMessages));
+  };
+
   return (
     <div className={`chat-container ${document.body.classList.contains('dark-mode') ? 'dark-mode' : ''}`}>
       <div className="chat-header">
@@ -200,6 +209,31 @@ const ChatInterface: React.FC = () => {
               <span className="timestamp">
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
+              
+              <PermissionGuard permission="delete_messages">
+                {message.id !== '1' && (
+                  <button 
+                    className="delete-message-btn" 
+                    onClick={() => handleDeleteMessage(message.id)}
+                    title="Delete message"
+                  >
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="14" 
+                      height="14" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    >
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                )}
+              </PermissionGuard>
             </div>
           </div>
         ))}

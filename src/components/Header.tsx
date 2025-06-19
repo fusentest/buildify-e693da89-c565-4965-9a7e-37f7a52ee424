@@ -2,10 +2,11 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import PermissionGuard from './auth/PermissionGuard';
 import './Header.css';
 
 const Header: React.FC = () => {
-  const { currentUser, logout, isAdmin } = useAuth();
+  const { currentUser, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,14 +26,14 @@ const Header: React.FC = () => {
           <div className="user-menu">
             <span className="user-name">Hello, {currentUser.name}</span>
             
-            {isAdmin && (
+            <PermissionGuard permission="view_dashboard">
               <Link 
                 to={location.pathname === '/admin' ? '/' : '/admin'} 
                 className="admin-link"
               >
                 {location.pathname === '/admin' ? 'Chat' : 'Dashboard'}
               </Link>
-            )}
+            </PermissionGuard>
             
             <Link to="/settings" className="settings-link">
               Settings

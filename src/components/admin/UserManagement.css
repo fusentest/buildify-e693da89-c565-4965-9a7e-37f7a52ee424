@@ -1,0 +1,196 @@
+
+.user-management {
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.user-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.user-management-header h2 {
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 0.8rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.success-message {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.8rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.users-table-container {
+  overflow-x: auto;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.users-table th {
+  background-color: #f5f7fa;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.users-table tr:last-child td {
+  border-bottom: none;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.role-badge.admin {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.role-badge.moderator {
+  background-color: #fff8e1;
+  color: #ff8f00;
+}
+
+.role-badge.user {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.role-select {
+  padding: 0.4rem;
+  border: 1px solid var(--light-gray);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-button,
+.save-button,
+.cancel-button {
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.edit-button {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.edit-button:hover:not(:disabled) {
+  background-color: #bbdefb;
+}
+
+.save-button {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.save-button:hover {
+  background-color: #c8e6c9;
+}
+
+.cancel-button {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.cancel-button:hover {
+  background-color: #ffcdd2;
+}
+
+.edit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.permission-denied {
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 2rem;
+  text-align: center;
+}
+
+.permission-denied h2 {
+  color: #c62828;
+  margin-bottom: 1rem;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.1rem;
+  color: var(--primary-color);
+}
+
+.no-data {
+  text-align: center;
+  color: #757575;
+  padding: 2rem !important;
+}
+
+@media (max-width: 768px) {
+  .user-management {
+    padding: 1rem;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .users-table th:nth-child(1),
+  .users-table td:nth-child(1) {
+    display: none;
+  }
+  
+  .user-management-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

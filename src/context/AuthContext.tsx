@@ -1,6 +1,7 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { User, UserPreferences } from '../types/auth';
+import { User, UserPreferences, Role, Permission } from '../types/auth';
+import { hasPermission, getPermissionsForRole } from '../utils/rbac';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -13,6 +14,8 @@ interface AuthContextType {
   updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   updatePreferences: (preferences: UserPreferences) => Promise<void>;
   isAdmin: boolean;
+  hasPermission: (permission: Permission) => boolean;
+  updateUserRole: (userId: string, newRole: Role) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,6 +65,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Remove password before storing in state/localStorage
       const { password: _, ...userWithoutPassword } = user;
       
+      // Ensure user has a role
+      if (!userWithoutPassword.role) {
+        userWithoutPassword.role = 'user';
+      }
+      
       setCurrentUser(userWithoutPassword);
       setIsAdmin(userWithoutPassword.role === 'admin');
       localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
@@ -88,13 +96,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Check if this is the first user - make them admin
       const isFirstUser = storedUsers.length === 0;
+      const role: Role = isFirstUser ? 'admin' : 'user';
       
       const newUser = {
         id: Date.now().toString(),
         email,
         password,
         name,
-        role: isFirstUser ? 'admin' : 'user',
+        role,
         createdAt: new Date().toISOString()
       };
       
@@ -237,6 +246,52 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         document.body.classList.remove('dark-mode');
       }
       
+      // Apply font size
+      document.body.setAttribute('data-font-size', preferences.fontSize);
+      
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  };
+  
+  // Check if current user has a specific permission
+  const checkPermission = (permission: Permission): boolean => {
+    if (!currentUser) return false;
+    return hasPermission(currentUser.role, permission);
+  };
+  
+  // Update a user's role (admin only)
+  const updateUserRole = async (userId: string, newRole: Role) => {
+    if (!currentUser) {
+      return Promise.reject(new Error('No user is logged in'));
+    }
+    
+    // Check if current user has permission to manage roles
+    if (!checkPermission('manage_roles')) {
+      return Promise.reject(new Error('You do not have permission to manage roles'));
+    }
+    
+    try {
+      const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      const userIndex = storedUsers.findIndex((u: any) => u.id === userId);
+      
+      if (userIndex === -1) {
+        throw new Error('User not found');
+      }
+      
+      // Update role
+      storedUsers[userIndex].role = newRole;
+      localStorage.setItem('users', JSON.stringify(storedUsers));
+      
+      // If the updated user is the current user, update current user state
+      if (userId === currentUser.id) {
+        const { password: _, ...userWithoutPassword } = storedUsers[userIndex];
+        setCurrentUser(userWithoutPassword);
+        setIsAdmin(userWithoutPassword.role === 'admin');
+        localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
+      }
+      
       return Promise.resolve();
     } catch (error) {
       return Promise.reject(error);
@@ -253,7 +308,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateEmail,
     updatePassword,
     updatePreferences,
-    isAdmin
+    isAdmin,
+    hasPermission: checkPermission,
+    updateUserRole
   };
 
   return (

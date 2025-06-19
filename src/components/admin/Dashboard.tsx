@@ -6,9 +6,13 @@ import {
 } from 'recharts';
 import { DashboardStats, User } from '../../types/auth';
 import { Message } from '../../types/chat';
+import { useAuth } from '../../context/AuthContext';
+import UserManagement from './UserManagement';
+import PermissionGuard from '../auth/PermissionGuard';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
+  const { hasPermission } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -128,6 +132,15 @@ const Dashboard: React.FC = () => {
     return sampleTopics;
   };
   
+  if (!hasPermission('view_dashboard')) {
+    return (
+      <div className="permission-denied">
+        <h2>Access Denied</h2>
+        <p>You don't have permission to view the dashboard.</p>
+      </div>
+    );
+  }
+  
   if (isLoading) {
     return <div className="dashboard-loading">Loading dashboard data...</div>;
   }
@@ -149,18 +162,22 @@ const Dashboard: React.FC = () => {
           >
             Overview
           </button>
-          <button 
-            className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
-          >
-            Users
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'messages' ? 'active' : ''}`}
-            onClick={() => setActiveTab('messages')}
-          >
-            Messages
-          </button>
+          <PermissionGuard permission="manage_users">
+            <button 
+              className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
+            >
+              Users
+            </button>
+          </PermissionGuard>
+          <PermissionGuard permission="view_analytics">
+            <button 
+              className={`tab-button ${activeTab === 'messages' ? 'active' : ''}`}
+              onClick={() => setActiveTab('messages')}
+            >
+              Messages
+            </button>
+          </PermissionGuard>
         </div>
       </div>
       
@@ -279,121 +296,92 @@ const Dashboard: React.FC = () => {
       )}
       
       {activeTab === 'users' && (
-        <div className="dashboard-users">
-          <div className="users-header">
-            <h2>User Management</h2>
-            <p>Total Users: {users.length}</p>
-          </div>
-          
-          <div className="users-table-container">
-            <table className="users-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Created At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map(user => (
-                  <tr key={user.id}>
-                    <td>{user.id.substring(0, 8)}...</td>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>
-                      <span className={`role-badge ${user.role === 'admin' ? 'admin' : 'user'}`}>
-                        {user.role || 'user'}
-                      </span>
-                    </td>
-                    <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-                {users.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="no-data">No users found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <PermissionGuard 
+          permission="manage_users"
+          fallback={<div className="permission-denied">You don't have permission to manage users.</div>}
+        >
+          <UserManagement />
+        </PermissionGuard>
       )}
       
       {activeTab === 'messages' && (
-        <div className="dashboard-messages">
-          <div className="messages-header">
-            <h2>Message Analytics</h2>
-            <p>Total Messages: {stats.chatStats.totalMessages}</p>
-          </div>
-          
-          <div className="chart-container">
-            <div className="chart-card full-width">
-              <h3>Messages by Day</h3>
-              <div className="chart-wrapper">
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart
-                    data={stats.chatStats.messagesByDay}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="count" stroke="#4a6fa5" activeDot={{ r: 8 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+        <PermissionGuard 
+          permission="view_analytics"
+          fallback={<div className="permission-denied">You don't have permission to view message analytics.</div>}
+        >
+          <div className="dashboard-messages">
+            <div className="messages-header">
+              <h2>Message Analytics</h2>
+              <p>Total Messages: {stats.chatStats.totalMessages}</p>
             </div>
-          </div>
-          
-          <div className="chart-container">
-            <div className="chart-card">
-              <h3>Popular Topics</h3>
-              <div className="chart-wrapper">
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={stats.chatStats.popularTopics}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="count"
+            
+            <div className="chart-container">
+              <div className="chart-card full-width">
+                <h3>Messages by Day</h3>
+                <div className="chart-wrapper">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart
+                      data={stats.chatStats.messagesByDay}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     >
-                      {stats.chatStats.popularTopics.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line type="monotone" dataKey="count" stroke="#4a6fa5" activeDot={{ r: 8 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
             
-            <div className="chart-card">
-              <h3>Topic Distribution</h3>
-              <div className="chart-wrapper">
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={stats.chatStats.popularTopics}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="topic" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#4fc3f7" />
-                  </BarChart>
-                </ResponsiveContainer>
+            <div className="chart-container">
+              <div className="chart-card">
+                <h3>Popular Topics</h3>
+                <div className="chart-wrapper">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={stats.chatStats.popularTopics}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="count"
+                      >
+                        {stats.chatStats.popularTopics.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              
+              <div className="chart-card">
+                <h3>Topic Distribution</h3>
+                <div className="chart-wrapper">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                      data={stats.chatStats.popularTopics}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="topic" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#4fc3f7" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </PermissionGuard>
       )}
     </div>
   );
