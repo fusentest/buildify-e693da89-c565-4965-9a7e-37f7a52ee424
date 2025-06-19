@@ -8,6 +8,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,12 +28,15 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Check if user is stored in localStorage
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
+      const user = JSON.parse(storedUser);
+      setCurrentUser(user);
+      setIsAdmin(user.role === 'admin');
     }
     setIsLoading(false);
   }, []);
@@ -55,6 +59,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { password: _, ...userWithoutPassword } = user;
       
       setCurrentUser(userWithoutPassword);
+      setIsAdmin(userWithoutPassword.role === 'admin');
       localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
       
       return Promise.resolve();
@@ -77,11 +82,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('User with this email already exists');
       }
       
+      // Check if this is the first user - make them admin
+      const isFirstUser = storedUsers.length === 0;
+      
       const newUser = {
         id: Date.now().toString(),
         email,
         password,
         name,
+        role: isFirstUser ? 'admin' : 'user',
         createdAt: new Date().toISOString()
       };
       
@@ -92,6 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { password: _, ...userWithoutPassword } = newUser;
       
       setCurrentUser(userWithoutPassword);
+      setIsAdmin(userWithoutPassword.role === 'admin');
       localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
       
       return Promise.resolve();
@@ -104,6 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     setCurrentUser(null);
+    setIsAdmin(false);
     localStorage.removeItem('currentUser');
   };
 
@@ -112,7 +123,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     login,
     signup,
-    logout
+    logout,
+    isAdmin
   };
 
   return (

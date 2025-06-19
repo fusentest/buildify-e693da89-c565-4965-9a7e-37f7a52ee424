@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Header.css';
 
 const Header: React.FC = () => {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -23,6 +24,16 @@ const Header: React.FC = () => {
         {currentUser ? (
           <div className="user-menu">
             <span className="user-name">Hello, {currentUser.name}</span>
+            
+            {isAdmin && (
+              <Link 
+                to={location.pathname === '/admin' ? '/' : '/admin'} 
+                className="admin-link"
+              >
+                {location.pathname === '/admin' ? 'Chat' : 'Dashboard'}
+              </Link>
+            )}
+            
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>

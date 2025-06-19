@@ -59,6 +59,20 @@
   font-weight: 500;
 }
 
+.admin-link {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.admin-link:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
 .logout-button {
   background-color: transparent;
   border: 1px solid var(--white);
@@ -95,5 +109,9 @@
   
   .user-name {
     display: none;
+  }
+  
+  .user-menu {
+    gap: 0.5rem;
   }
 }

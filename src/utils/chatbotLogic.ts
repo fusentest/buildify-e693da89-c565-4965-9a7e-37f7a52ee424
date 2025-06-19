@@ -57,41 +57,77 @@ const getRandomResponse = (responses: string[]): string => {
 export const getChatbotResponse = (userInput: string): string => {
   const input = userInput.toLowerCase();
   
+  // Store message in localStorage for analytics
+  storeMessage(userInput, 'user');
+  
   // Check for greetings
   if (/^(hi|hello|hey|greetings|howdy)/i.test(input)) {
-    return getRandomResponse(responsePatterns.greeting);
+    const response = getRandomResponse(responsePatterns.greeting);
+    storeMessage(response, 'bot');
+    return response;
   }
   
   // Check for farewells
   if (/^(bye|goodbye|see you|farewell)/i.test(input)) {
-    return getRandomResponse(responsePatterns.farewell);
+    const response = getRandomResponse(responsePatterns.farewell);
+    storeMessage(response, 'bot');
+    return response;
   }
   
   // Check for thanks
   if (/^(thanks|thank you|appreciate it)/i.test(input)) {
-    return getRandomResponse(responsePatterns.thanks);
+    const response = getRandomResponse(responsePatterns.thanks);
+    storeMessage(response, 'bot');
+    return response;
   }
   
   // Check for questions about the bot
   if (/who are you|what are you|tell me about yourself|about you/i.test(input)) {
-    return getRandomResponse(responsePatterns.about);
+    const response = getRandomResponse(responsePatterns.about);
+    storeMessage(response, 'bot');
+    return response;
   }
   
   // Check for help requests
   if (/help|assist|support/i.test(input)) {
-    return getRandomResponse(responsePatterns.help);
+    const response = getRandomResponse(responsePatterns.help);
+    storeMessage(response, 'bot');
+    return response;
   }
   
   // Check for weather questions
   if (/weather|temperature|forecast|rain|sunny/i.test(input)) {
-    return getRandomResponse(responsePatterns.weather);
+    const response = getRandomResponse(responsePatterns.weather);
+    storeMessage(response, 'bot');
+    return response;
   }
   
   // Check for joke requests
   if (/joke|funny|make me laugh/i.test(input)) {
-    return getRandomResponse(responsePatterns.joke);
+    const response = getRandomResponse(responsePatterns.joke);
+    storeMessage(response, 'bot');
+    return response;
   }
   
   // Default response for unrecognized inputs
-  return getRandomResponse(responsePatterns.default);
+  const response = getRandomResponse(responsePatterns.default);
+  storeMessage(response, 'bot');
+  return response;
+};
+
+// Store messages in localStorage for analytics
+const storeMessage = (text: string, sender: 'user' | 'bot') => {
+  try {
+    const storedMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
+    const newMessage = {
+      id: Date.now().toString(),
+      text,
+      sender,
+      timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('chatMessages', JSON.stringify([...storedMessages, newMessage]));
+  } catch (error) {
+    console.error('Error storing message:', error);
+  }
 };
