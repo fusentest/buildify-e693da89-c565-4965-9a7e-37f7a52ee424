@@ -39,6 +39,10 @@ const Header: React.FC = () => {
               Settings
             </Link>
             
+            <Link to="/payment" className="settings-link">
+              Payment
+            </Link>
+            
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>
